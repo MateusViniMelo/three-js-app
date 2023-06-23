@@ -1,4 +1,5 @@
 {
+  "homepage": "https://MateusViniMelo.github.io/three-js-app",
   "name": "three-js-project",
   "private": true,
   "version": "0.0.0",
@@ -6,12 +7,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.10",
     "@types/three": "^0.152.1",
     "dat.gui": "^0.7.9",
+    "gh-pages": "^5.0.0",
     "typescript": "^5.0.2",
     "vite": "^4.3.9"
   },
