@@ -30,14 +30,6 @@ const orbit = new OrbitControls(camera, renderer.domElement);
 camera.position.set(115, 47, 146);
 orbit.update();
 
-// Sets a 12 by 12 gird helper
-/* const gridHelper = new THREE.GridHelper(40, 40);
-scene.add(gridHelper);
-
-// Sets the x, y, and z axes with each having a length of 4
-const axesHelper = new THREE.AxesHelper(20);
-scene.add(axesHelper); */
-
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 scene.background = cubeTextureLoader.load([
@@ -108,14 +100,20 @@ assetLoader.load("assets/modelos/farm/scene.gltf", function (gltf) {
   scene.add(model);
 });
 
-const x3 = new THREEx3({
-  THREE,
-  OrbitControls,
-  camera,
-  renderer,
-  scene,
-});
-x3.add(light, { label: "Luz" });
+const x3 = new THREEx3(
+  {
+    THREE,
+    OrbitControls,
+    camera,
+    renderer,
+    scene,
+  },
+  {
+    grid: { visible: false },
+    axes: { visible: false },
+  }
+);
+x3.add(light, { label: "Luz", helper: {visible: false}});
 x3.add(camera);
 
 const clock: THREE.Clock = new THREE.Clock();
