@@ -69,6 +69,7 @@ const vacaLoader = new GLTFLoader();
 let mixer: THREE.AnimationMixer;
 vacaLoader.load("assets/modelos/animais/Cow.gltf", function (gltf) {
   const vaca = gltf.scene;
+  vaca.position.y = -1.2
   mixer = new THREE.AnimationMixer(vaca);
 
   vaca.traverse(function (node) {
