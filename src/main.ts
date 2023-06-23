@@ -115,17 +115,17 @@ const x3 = new THREEx3({
   renderer,
   scene,
 });
-x3.add(light, {label: "Luz"});
-
+x3.add(light, { label: "Luz" });
 x3.add(camera);
 
 const clock: THREE.Clock = new THREE.Clock();
 function animate() {
-  mixer.update(clock.getDelta());
+  if (mixer) {
+    mixer.update(clock.getDelta());
+  }
   x3.tick();
 
   x3.fps(() => {
-    
     renderer.render(scene, camera);
   });
 }
