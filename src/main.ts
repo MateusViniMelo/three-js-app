@@ -65,12 +65,15 @@ plano.rotation.x = THREE.MathUtils.degToRad(-90);
 //scene.add(plano)
 const assetLoader = new GLTFLoader();
 const vacaLoader = new GLTFLoader();
+const cavaloLoader = new GLTFLoader();
 
-let mixer: THREE.AnimationMixer;
+let mixerVaca: THREE.AnimationMixer;
+
+let mixerCavalo: THREE.AnimationMixer;
 vacaLoader.load("assets/modelos/animais/Cow.gltf", function (gltf) {
   const vaca = gltf.scene;
-  vaca.position.y = -1.2
-  mixer = new THREE.AnimationMixer(vaca);
+  vaca.position.y = -1.2;
+  mixerVaca = new THREE.AnimationMixer(vaca);
 
   vaca.traverse(function (node) {
     // @ts-ignore
@@ -84,9 +87,34 @@ vacaLoader.load("assets/modelos/animais/Cow.gltf", function (gltf) {
     "Eating"
   );
 
-  const action = mixer.clipAction(clip);
+  const action = mixerVaca.clipAction(clip);
   action.play();
   scene.add(vaca);
+});
+
+cavaloLoader.load("assets/modelos/animais/Horse.gltf", function (gltf) {
+  const cavalo = gltf.scene;
+  cavalo.position.y = -1.5;
+  cavalo.position.x = 10;
+  cavalo.position.z = 10;
+  cavalo.rotation.y = 190
+  mixerCavalo = new THREE.AnimationMixer(cavalo);
+
+  cavalo.traverse(function (node) {
+    // @ts-ignore
+    if (node.isMesh) {
+      node.castShadow = true;
+    }
+  });
+  const clips: THREE.AnimationClip[] = gltf.animations;
+  const clip: THREE.AnimationClip = THREE.AnimationClip.findByName(
+    clips,
+    "Idle_2"
+  );
+
+  const action = mixerCavalo.clipAction(clip);
+  action.play();
+  scene.add(cavalo);
 });
 
 assetLoader.load("assets/modelos/farm/scene.gltf", function (gltf) {
@@ -114,13 +142,17 @@ const x3 = new THREEx3(
     axes: { visible: false },
   }
 );
-x3.add(light, { label: "Luz", helper: {visible: false}});
+x3.add(light, { label: "Luz", helper: { visible: false } });
 x3.add(camera);
 
 const clock: THREE.Clock = new THREE.Clock();
+const clockCavalo: THREE.Clock = new THREE.Clock();
 function animate() {
-  if (mixer) {
-    mixer.update(clock.getDelta());
+  if (mixerVaca) {
+    mixerVaca.update(clock.getDelta());
+  }
+  if (mixerCavalo) {
+    mixerCavalo.update(clockCavalo.getDelta());
   }
   x3.tick();
 
