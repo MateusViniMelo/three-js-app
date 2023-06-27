@@ -41,11 +41,7 @@ scene.background = cubeTextureLoader.load([
   skyTexture,
 ]);
 
-const light = new THREE.DirectionalLight(0xffffbb, 1);
-
-light.position.set(30, 200, 30);
-light.castShadow = true;
-
+const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
 scene.add(light);
 
 const gramaMaterial = new THREE.MeshStandardMaterial({
@@ -97,7 +93,7 @@ cavaloLoader.load("assets/modelos/animais/Horse.gltf", function (gltf) {
   cavalo.position.y = -1.5;
   cavalo.position.x = 10;
   cavalo.position.z = 10;
-  cavalo.rotation.y = 190
+  cavalo.rotation.y = 190;
   mixerCavalo = new THREE.AnimationMixer(cavalo);
 
   cavalo.traverse(function (node) {
@@ -114,6 +110,15 @@ cavaloLoader.load("assets/modelos/animais/Horse.gltf", function (gltf) {
 
   const action = mixerCavalo.clipAction(clip);
   action.play();
+
+
+  const lightVaca = new THREE.DirectionalLight(0xffffbb, 0.5);
+  lightVaca.position.set(30, 200, 30);
+
+  lightVaca.castShadow = true;
+
+  scene.add(lightVaca);
+  lightVaca.target = cavalo;
   scene.add(cavalo);
 });
 
@@ -126,6 +131,14 @@ assetLoader.load("assets/modelos/farm/scene.gltf", function (gltf) {
       node.receiveShadow = true;
     }
   });
+
+  const lightVaca = new THREE.DirectionalLight(0xffffbb, 0.5);
+  lightVaca.position.set(30, 200, 30);
+
+  lightVaca.castShadow = true;
+
+  scene.add(lightVaca);
+  lightVaca.target = model;
   scene.add(model);
 });
 
@@ -142,7 +155,7 @@ const x3 = new THREEx3(
     axes: { visible: false },
   }
 );
-x3.add(light, { label: "Luz", helper: { visible: false } });
+//x3.add(lightVaca, { label: "Luz", helper: { visible: false } });
 x3.add(camera);
 
 const clock: THREE.Clock = new THREE.Clock();
