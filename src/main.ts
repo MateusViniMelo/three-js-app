@@ -3,12 +3,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 // @ts-ignore
 import THREEx3 from "three-x3";
-import skyTexture from "./assets/images/white-cloud-blue-sky.jpg";
-import gramaBaseColor from "./assets/images/grass/Stylized_Grass_003_basecolor.jpg";
-import gramaNormal from "./assets/images/grass/Stylized_Grass_003_normal.jpg";
-import gramaHeight from "./assets/images/grass/Stylized_Grass_003_height.png";
-import gramaAmbientOclusion from "./assets/images/grass/Stylized_Grass_003_ambientOcclusion.jpg";
-import gramaRoughness from "./assets/images/grass/Stylized_Grass_003_roughness.jpg";
+import skyTexture from "/assets/images/sky.jpg";
+import gramaBaseColor from "/assets/images/grass/Stylized_Grass_003_basecolor.jpg";
+import gramaNormal from "/assets/images/grass/Stylized_Grass_003_normal.jpg";
+import gramaHeight from "/assets/images/grass/Stylized_Grass_003_height.png";
+import gramaAmbientOclusion from "/assets/images/grass/Stylized_Grass_003_ambientOcclusion.jpg";
+import gramaRoughness from "/assets/images/grass/Stylized_Grass_003_roughness.jpg";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
