@@ -44,7 +44,7 @@ light();
 
 // MODEL WITH ANIMATIONS
 let characterControls: CharacterControls;
-new GLTFLoader().load("/models/Farmer.gltf", function (gltf) {
+new GLTFLoader().load("models/Farmer.gltf", function (gltf) {
   const model = gltf.scene;
   model.position.x = -7
   model.traverse(function (object: any) {
@@ -73,7 +73,7 @@ new GLTFLoader().load("/models/Farmer.gltf", function (gltf) {
 
 // MODEL FARM
 let mixerFazenda: THREE.AnimationMixer;
-new GLTFLoader().load("/models/scene.gltf", function (gltf) {
+new GLTFLoader().load("models/scene.gltf", function (gltf) {
   const model = gltf.scene;
   model.scale.set(0.8, 0.8, 0.8);
   model.position.y = -0.2;
@@ -96,7 +96,7 @@ new GLTFLoader().load("/models/scene.gltf", function (gltf) {
 
 // MODEL COW
 let mixerVaca: THREE.AnimationMixer;
-new GLTFLoader().load("/models/Cow.gltf", function (gltf) {
+new GLTFLoader().load("models/Cow.gltf", function (gltf) {
   const model = gltf.scene;
   model.scale.set(0.3, 0.3, 0.3);
     model.position.x = -6;
@@ -121,7 +121,7 @@ new GLTFLoader().load("/models/Cow.gltf", function (gltf) {
 
 // MODEL HORSE
 let mixerCavalo: THREE.AnimationMixer;
-new GLTFLoader().load("/models/Horse_White.gltf", function (gltf) {
+new GLTFLoader().load("models/Horse_White.gltf", function (gltf) {
   const model = gltf.scene;
   model.scale.set(0.37, 0.37, 0.37);
   model.rotation.y = 30;
@@ -147,7 +147,7 @@ new GLTFLoader().load("/models/Horse_White.gltf", function (gltf) {
 // MODEL DONKEY
 
 let mixerBurro: THREE.AnimationMixer;
-new GLTFLoader().load("/models/Donkey.gltf", function (gltf) {
+new GLTFLoader().load("models/Donkey.gltf", function (gltf) {
   const model = gltf.scene;
 
   model.scale.set(0.37, 0.37, 0.37);
