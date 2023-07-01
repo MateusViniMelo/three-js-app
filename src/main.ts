@@ -1,82 +1,112 @@
+import { KeyDisplay } from "./utils";
+import { CharacterControls } from "./characterControls";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 // @ts-ignore
 import THREEx3 from "three-x3";
-import skyTexture from "/assets/images/sky.jpg";
-import gramaBaseColor from "/assets/images/grass/Stylized_Grass_003_basecolor.jpg";
-import gramaNormal from "/assets/images/grass/Stylized_Grass_003_normal.jpg";
-import gramaHeight from "/assets/images/grass/Stylized_Grass_003_height.png";
-import gramaAmbientOclusion from "/assets/images/grass/Stylized_Grass_003_ambientOcclusion.jpg";
-import gramaRoughness from "/assets/images/grass/Stylized_Grass_003_roughness.jpg";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-document.body.appendChild(renderer.domElement);
-
-// Sets the color of the background
-// renderer.setClearColor(0xfefefe);
-
+// SCENE
 const scene = new THREE.Scene();
-const loader = new THREE.TextureLoader();
-const camera = new THREE.PerspectiveCamera(45, 800 / 600, 0.1, 1000);
+scene.background = new THREE.Color(0xa8def0);
 
-// Sets orbit control to move the camera around
-const orbit = new OrbitControls(camera, renderer.domElement);
+// CAMERA
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.y = 5;
+camera.position.z = 5;
+camera.position.x = 0;
 
-// Camera positioning
-camera.position.set(115, 47, 146);
-orbit.update();
+// RENDERER
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-const cubeTextureLoader = new THREE.CubeTextureLoader();
+// CONTROLS
+const orbitControls = new OrbitControls(camera, renderer.domElement);
+orbitControls.enableDamping = true;
+orbitControls.minDistance = 5;
+orbitControls.maxDistance = 15;
+orbitControls.enablePan = false;
+orbitControls.maxPolarAngle = Math.PI / 2 - 0.05;
+orbitControls.update();
 
-scene.background = cubeTextureLoader.load([
-  skyTexture,
-  skyTexture,
-  skyTexture,
-  skyTexture,
-  skyTexture,
-  skyTexture,
-]);
+// LIGHTS
+light();
 
-const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
-scene.add(light);
+// FLOOR
 
-const gramaMaterial = new THREE.MeshStandardMaterial({
-  map: loader.load(gramaBaseColor),
-  normalMap: loader.load(gramaNormal),
-  alphaMap: loader.load(gramaHeight),
-  aoMap: loader.load(gramaAmbientOclusion),
-  roughnessMap: loader.load(gramaRoughness),
-  color: 0x00ff00,
-
-  side: THREE.DoubleSide,
-});
-const planoGeometria = new THREE.PlaneGeometry(80, 80);
-const plano = new THREE.Mesh(planoGeometria, gramaMaterial);
-plano.receiveShadow = true;
-plano.rotation.x = THREE.MathUtils.degToRad(-90);
-//scene.add(plano)
-const assetLoader = new GLTFLoader();
-const vacaLoader = new GLTFLoader();
-const cavaloLoader = new GLTFLoader();
-
-let mixerVaca: THREE.AnimationMixer;
-
-let mixerCavalo: THREE.AnimationMixer;
-vacaLoader.load("assets/modelos/animais/Cow.gltf", function (gltf) {
-  const vaca = gltf.scene;
-  vaca.position.y = -1.2;
-  mixerVaca = new THREE.AnimationMixer(vaca);
-
-  vaca.traverse(function (node) {
-    // @ts-ignore
-    if (node.isMesh) {
-      node.castShadow = true;
-    }
+// MODEL WITH ANIMATIONS
+let characterControls: CharacterControls;
+new GLTFLoader().load("models/Farmer.gltf", function (gltf) {
+  const model = gltf.scene;
+  model.position.x = -7
+  model.traverse(function (object: any) {
+    if (object.isMesh) object.castShadow = true;
   });
+  scene.add(model);
+
+  const gltfAnimations: THREE.AnimationClip[] = gltf.animations;
+  const mixer = new THREE.AnimationMixer(model);
+  const animationsMap: Map<string, THREE.AnimationAction> = new Map();
+  gltfAnimations
+    .filter((a) => a.name != "TPose")
+    .forEach((a: THREE.AnimationClip) => {
+      animationsMap.set(a.name, mixer.clipAction(a));
+    });
+
+  characterControls = new CharacterControls(
+    model,
+    mixer,
+    animationsMap,
+    orbitControls,
+    camera,
+    "Idle"
+  );
+});
+
+// MODEL FARM
+let mixerFazenda: THREE.AnimationMixer;
+new GLTFLoader().load("models/scene.gltf", function (gltf) {
+  const model = gltf.scene;
+  model.scale.set(0.8, 0.8, 0.8);
+  model.position.y = -0.2;
+  model.traverse(function (object: any) {
+    if (object.isMesh) object.receiveShadow = true;
+  });
+  scene.add(model);
+
+
+   mixerFazenda = new THREE.AnimationMixer(model);
+   const clips: THREE.AnimationClip[] = gltf.animations;
+   const clip: THREE.AnimationClip = THREE.AnimationClip.findByName(
+     clips,
+     "prop|Cylinder.001Action"
+   );
+
+   const action = mixerFazenda.clipAction(clip);
+   action.play();
+});
+
+// MODEL COW
+let mixerVaca: THREE.AnimationMixer;
+new GLTFLoader().load("models/Cow.gltf", function (gltf) {
+  const model = gltf.scene;
+  model.scale.set(0.3, 0.3, 0.3);
+    model.position.x = -6;
+    model.position.z = 5;
+
+  model.traverse(function (object: any) {
+    if (object.isMesh) object.castShadow = true;
+  });
+
+  mixerVaca = new THREE.AnimationMixer(model);
   const clips: THREE.AnimationClip[] = gltf.animations;
   const clip: THREE.AnimationClip = THREE.AnimationClip.findByName(
     clips,
@@ -85,101 +115,145 @@ vacaLoader.load("assets/modelos/animais/Cow.gltf", function (gltf) {
 
   const action = mixerVaca.clipAction(clip);
   action.play();
-  scene.add(vaca);
+
+  scene.add(model);
 });
 
-cavaloLoader.load("assets/modelos/animais/Horse.gltf", function (gltf) {
-  const cavalo = gltf.scene;
-  cavalo.position.y = -1.5;
-  cavalo.position.x = 10;
-  cavalo.position.z = 10;
-  cavalo.rotation.y = 190;
-  mixerCavalo = new THREE.AnimationMixer(cavalo);
-
-  cavalo.traverse(function (node) {
-    // @ts-ignore
-    if (node.isMesh) {
-      node.castShadow = true;
-    }
+// MODEL HORSE
+let mixerCavalo: THREE.AnimationMixer;
+new GLTFLoader().load("models/Horse_White.gltf", function (gltf) {
+  const model = gltf.scene;
+  model.scale.set(0.37, 0.37, 0.37);
+  model.rotation.y = 30;
+  model.position.x = -6;
+  model.position.z = 1;
+  model.traverse(function (object: any) {
+    if (object.isMesh) object.castShadow = true;
   });
+
+  mixerCavalo = new THREE.AnimationMixer(model);
+  const clips: THREE.AnimationClip[] = gltf.animations;
+  const clip: THREE.AnimationClip = THREE.AnimationClip.findByName(
+    clips,
+    "Idle"
+  );
+
+  const action = mixerCavalo.clipAction(clip);
+  action.play();
+
+  scene.add(model);
+});
+
+// MODEL DONKEY
+
+let mixerBurro: THREE.AnimationMixer;
+new GLTFLoader().load("models/Donkey.gltf", function (gltf) {
+  const model = gltf.scene;
+
+  model.scale.set(0.37, 0.37, 0.37);
+  model.rotation.y = -30;
+  model.position.x = -4;
+  model.position.z = 8;
+
+  model.traverse(function (object: any) {
+    if (object.isMesh) object.castShadow = true;
+  });
+  scene.add(model);
+
+  mixerBurro = new THREE.AnimationMixer(model);
   const clips: THREE.AnimationClip[] = gltf.animations;
   const clip: THREE.AnimationClip = THREE.AnimationClip.findByName(
     clips,
     "Idle_2"
   );
 
-  const action = mixerCavalo.clipAction(clip);
+  const action = mixerBurro.clipAction(clip);
   action.play();
-
-
-  const lightVaca = new THREE.DirectionalLight(0xffffbb, 0.5);
-  lightVaca.position.set(30, 200, 30);
-
-  lightVaca.castShadow = true;
-
-  scene.add(lightVaca);
-  lightVaca.target = cavalo;
-  scene.add(cavalo);
 });
 
-assetLoader.load("assets/modelos/farm/scene.gltf", function (gltf) {
-  const model = gltf.scene;
-
-  model.traverse(function (node) {
-    // @ts-ignore
-    if (node.isMesh) {
-      node.receiveShadow = true;
+// CONTROL KEYS
+const keysPressed = {};
+const keyDisplayQueue = new KeyDisplay();
+document.addEventListener(
+  "keydown",
+  (event) => {
+    keyDisplayQueue.down(event.key);
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      (keysPressed as any)[event.key.toLowerCase()] = true;
     }
-  });
-
-  const lightVaca = new THREE.DirectionalLight(0xffffbb, 0.5);
-  lightVaca.position.set(30, 200, 30);
-
-  lightVaca.castShadow = true;
-
-  scene.add(lightVaca);
-  lightVaca.target = model;
-  scene.add(model);
-});
-
-const x3 = new THREEx3(
-  {
-    THREE,
-    OrbitControls,
-    camera,
-    renderer,
-    scene,
   },
-  {
-    grid: { visible: false },
-    axes: { visible: false },
-  }
+  false
 );
-//x3.add(lightVaca, { label: "Luz", helper: { visible: false } });
-x3.add(camera);
+document.addEventListener(
+  "keyup",
+  (event) => {
+    keyDisplayQueue.up(event.key);
+    (keysPressed as any)[event.key.toLowerCase()] = false;
+  },
+  false
+);
 
-const clock: THREE.Clock = new THREE.Clock();
+const clock = new THREE.Clock();
+const clockVaca: THREE.Clock = new THREE.Clock();
 const clockCavalo: THREE.Clock = new THREE.Clock();
+const clockBurro: THREE.Clock = new THREE.Clock();
+const clockFazenda: THREE.Clock = new THREE.Clock();
+// ANIMATE
 function animate() {
+  let mixerUpdateDelta = clock.getDelta();
+  if (characterControls) {
+    characterControls.update(mixerUpdateDelta, keysPressed);
+  }
   if (mixerVaca) {
-    mixerVaca.update(clock.getDelta());
+    mixerVaca.update(clockVaca.getDelta());
   }
   if (mixerCavalo) {
     mixerCavalo.update(clockCavalo.getDelta());
   }
-  x3.tick();
-
-  x3.fps(() => {
-    renderer.render(scene, camera);
-  });
+  if (mixerBurro) {
+    mixerBurro.update(clockBurro.getDelta());
+  }
+  if (mixerFazenda) {
+    mixerFazenda.update(clockFazenda.getDelta());
+  }
+  orbitControls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
 }
 
-renderer.setAnimationLoop(animate);
-window.addEventListener("resize", function () {
+document.body.appendChild(renderer.domElement);
+animate();
+
+// DEBUG
+
+//x3.add(lightVaca, { label: "Luz", helper: { visible: false } });
+//x3.add(camera);
+
+// RESIZE HANDLER
+function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-});
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-//renderer.physicallyCorrectLights = true;
+  keyDisplayQueue.updatePosition();
+}
+window.addEventListener("resize", onWindowResize);
+
+function light() {
+  scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.7));
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(-60, 100, -10);
+  dirLight.castShadow = true;
+  dirLight.shadow.camera.top = 50;
+  dirLight.shadow.camera.bottom = -50;
+  dirLight.shadow.camera.left = -50;
+  dirLight.shadow.camera.right = 50;
+  dirLight.shadow.camera.near = 0.1;
+  dirLight.shadow.camera.far = 200;
+  dirLight.shadow.mapSize.width = 4096;
+  dirLight.shadow.mapSize.height = 4096;
+  scene.add(dirLight);
+  // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
+}
