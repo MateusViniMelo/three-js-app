@@ -7,26 +7,45 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 // SCENE
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xa8def0);
+let scene = new THREE.Scene();
+//scene.background = new THREE.Color(0xa8def0);
+
+//TEXTURA
+//var skybox = new THREE.CubeTextureLoader().load([
+//  "image/arid2_ft.jpg"
+//  "image/arid2_bk.jpg"
+//  "image/arid2_up.jpg"
+//  "image/arid2_dn.jpg"
+//  "image/arid2_rt.jpg"
+//  "image/arid2_lf.jpg"
+//]);
+//scene.background = skybox;
+
+const loader = new THREE.TextureLoader();
+loader.load('/image/164551.png' , function(texture)
+            {
+              scene.background = texture;
+            });
 
 // CAMERA
 const camera = new THREE.PerspectiveCamera(
-  45,
+  45, //FOV
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
+
+//posição inicial da camera
 camera.position.y = 5;
 camera.position.z = 5;
 camera.position.x = 0;
 
 // RENDERER
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const renderer = new THREE.WebGLRenderer({ antialias: true }); //instanciando API WebGL com anti-serrilhado
+renderer.setSize(window.innerWidth, window.innerHeight); //resolução de exibição
+renderer.setPixelRatio(window.devicePixelRatio); //resolução de renderização
+renderer.shadowMap.enabled = true; //habilitar sombra na renderização
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; //tipo de sombra mais suave
 
 // CONTROLS
 const orbitControls = new OrbitControls(camera, renderer.domElement);
@@ -38,9 +57,7 @@ orbitControls.maxPolarAngle = Math.PI / 2 - 0.05;
 orbitControls.update();
 
 // LIGHTS
-light();
-
-// FLOOR
+light(); //chamando função para criar luz
 
 // MODEL WITH ANIMATIONS
 let characterControls: CharacterControls;
@@ -145,7 +162,6 @@ new GLTFLoader().load("models/Horse_White.gltf", function (gltf) {
 });
 
 // MODEL DONKEY
-
 let mixerBurro: THREE.AnimationMixer;
 new GLTFLoader().load("models/Donkey.gltf", function (gltf) {
   const model = gltf.scene;
@@ -200,6 +216,7 @@ const clockVaca: THREE.Clock = new THREE.Clock();
 const clockCavalo: THREE.Clock = new THREE.Clock();
 const clockBurro: THREE.Clock = new THREE.Clock();
 const clockFazenda: THREE.Clock = new THREE.Clock();
+
 // ANIMATE
 function animate() {
   let mixerUpdateDelta = clock.getDelta();
@@ -241,11 +258,11 @@ function onWindowResize() {
 window.addEventListener("resize", onWindowResize);
 
 function light() {
-  scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.7));
-
-  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  //scene.add(new THREE.AmbientLight(0xffffbb, 0.7)); //ilumina todos os objetos da cena igualmente (não gera sombra)
+  scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.7)); //luz diretamente acima da cena (não gera sombra)
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1); //sol, luz que incide em uma direção específica (gera sombra)
   dirLight.position.set(-60, 100, -10);
-  dirLight.castShadow = true;
+  dirLight.castShadow = true; //ativar sombras
   dirLight.shadow.camera.top = 50;
   dirLight.shadow.camera.bottom = -50;
   dirLight.shadow.camera.left = -50;
@@ -254,6 +271,6 @@ function light() {
   dirLight.shadow.camera.far = 200;
   dirLight.shadow.mapSize.width = 4096;
   dirLight.shadow.mapSize.height = 4096;
-  scene.add(dirLight);
-  // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
+  scene.add(dirLight); //adicionando sol
+  //scene.add( new THREE.CameraHelper(dirLight.shadow.camera)) //grade da luz direcional
 }
