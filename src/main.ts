@@ -22,7 +22,7 @@ let scene = new THREE.Scene();
 //scene.background = skybox;
 
 const loader = new THREE.TextureLoader();
-loader.load('/image/164551.png' , function(texture)
+loader.load('image/164551.png' , function(texture: any)
             {
               scene.background = texture;
             });
